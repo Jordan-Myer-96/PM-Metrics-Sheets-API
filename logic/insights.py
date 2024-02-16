@@ -3,6 +3,7 @@ from collections import Counter
 from itertools import combinations
 from collections import defaultdict
 from typing import List, Dict, Tuple, Any
+from gspread import Worksheet
 
 from logic.transformations import *
 
@@ -34,7 +35,6 @@ def sum_filtered_packs(runs: list[dict]) -> None:
     for word, count in word_counts.most_common():
         print(f"{del_prefix(word)}: {count}")
 
-
 # Counts the number of runs with enabledExpansionPacks and prints the ratio.
 def count_enabled_expansion_packs(runs: list[dict]) -> None:
     enabled_count = 0
@@ -45,7 +45,6 @@ def count_enabled_expansion_packs(runs: list[dict]) -> None:
             enabled_count += 1
 
     print(make_ratio(enabled_count, total_count))
-
 
 # Counts the number of runs with enabledExpansionPacks for each host and prints the ratio.
 def count_enabled_expansion_packs_per_host(runs: list[dict]) -> None:
@@ -64,7 +63,6 @@ def count_enabled_expansion_packs_per_host(runs: list[dict]) -> None:
             host_count[host] = True
 
     print(f"{sum(host_count.values())}/{len(host_count)}")
-
 
 # Counts the number of times each pack was picked and prints the results.
 def count_pack_picks(runs: list[dict]) -> None:
@@ -102,7 +100,6 @@ def count_pack_picks(runs: list[dict]) -> None:
     for choice, picked_count, not_picked_count, pick_rate in sorted_result:
         print(f"{del_prefix(choice)}: {pick_rate:.2%} ({picked_count}/{not_picked_count + picked_count})")
 
-
 def count_most_common_players(runs: list[dict]) -> None:
     host_counts = Counter()
 
@@ -117,23 +114,24 @@ def count_most_common_players(runs: list[dict]) -> None:
         if count >= 20:
             print(f"{host}: {count}")
 
-
 def count_most_common_picked_hats(runs: list[dict]) -> None:
     picked_hat_counts = Counter()
-
+    picked_hat_output = []
     for data_dict in runs:
         picked_hat = data_dict.get("pickedHat")
         if picked_hat:
             picked_hat_counts[picked_hat] += 1
 
     for picked_hat, count in picked_hat_counts.most_common():
-        print(f"{del_prefix(picked_hat)}: {count}")
-
-
+        #print(f"{del_prefix(picked_hat)}: {count}")
+        picked_hat_output.append([del_prefix(picked_hat),count])
+    
+    return picked_hat_output
+    
 def count_pack_victory_rate(runs: list[dict]) -> None:
     pack_wins = {}
     pack_runs = {}
-
+    
     for data_dict in runs:
         victory = data_dict.get("victory", False)
         current_packs = data_dict.get("currentPacks", "").split(",")
@@ -149,11 +147,13 @@ def count_pack_victory_rate(runs: list[dict]) -> None:
         reverse=True
     )
 
+    pack_victory_output = []
     for pack in sorted_packs:
         wins = pack_wins[pack]
         total_runs = pack_runs.get(pack, 0)
-        print(f"{del_prefix(pack)}: {make_ratio(wins, total_runs)}")
-
+        pack_victory_output.append([del_prefix(pack),wins,total_runs,make_ratio(wins,total_runs)])
+        
+    return(pack_victory_output)
 
 # Count card picks of current run cards (counts upgraded cards seperately)
 def count_card_pick_rate(runs: list[dict], card_to_pack: dict) -> None:
@@ -189,10 +189,13 @@ def count_card_pick_rate(runs: list[dict], card_to_pack: dict) -> None:
     # Sort the results by pick rate in descending order
     sorted_result = sorted(result, key=lambda x: x[3], reverse=True)
 
+    pick_rate_output = []
     for choice, picked_count, not_picked_count, pick_rate in sorted_result:
-        print(
-            f"{add_pack_prefix(choice, card_to_pack)}: {pick_rate:.2%} ({picked_count}/{not_picked_count + picked_count})")
-
+        
+        prefix, modified_card_name = add_pack_prefix(choice, card_to_pack)
+        pick_rate_output.append([prefix,modified_card_name, picked_count, not_picked_count + picked_count,pick_rate])
+        #print(f"{add_pack_prefix(choice, card_to_pack)}: {pick_rate:.2%} ({picked_count}/{not_picked_count + picked_count})")
+    return pick_rate_output
 
 def count_win_rates(runs: list[dict]) -> None:
     # Create a dictionary to store wins and total runs per ascension level
@@ -218,16 +221,18 @@ def count_win_rates(runs: list[dict]) -> None:
 
     # Sort ascension levels in ascending order
     sorted_ascension_levels = sorted(ascension_stats.keys(), key=lambda x: int(x))
-
-    print(
-        f"Total win rate: {make_ratio(all_stats['wins'], all_stats['total_runs'])}")
+    asc_win_rate_output = []
+    print(f"Total win rate: {make_ratio(all_stats['wins'], all_stats['total_runs'])}")
     # Calculate and print win rates per ascension level (sorted)
     for ascension_level in sorted_ascension_levels:
         stats = ascension_stats[ascension_level]
         wins = stats["wins"]
         total_runs = stats["total_runs"]
-        print(f"Win rate on ascension {ascension_level}: {make_ratio(wins, total_runs)}")
+        asc_win_rate_output.append([ascension_level,wins,total_runs,make_ratio(wins,total_runs)])
+        #print(f"Win rate on ascension {ascension_level}: {make_ratio(wins, total_runs)}")
 
+    asc_win_rate_output.append(["Total Win Rate",all_stats['wins'],all_stats['total_runs'],make_ratio(all_stats['wins'], all_stats['total_runs'])])
+    return asc_win_rate_output
 
 def count_median_deck_sizes(runs: list[dict]) -> None:
     # Create a dictionary to store deck sizes of victorious runs per ascension level
@@ -254,12 +259,15 @@ def count_median_deck_sizes(runs: list[dict]) -> None:
         key=lambda x: int(x) if x != "Unknown" else float("inf")
     )
 
+    median_size_output = list()
+    
     print(f"Median deck size for any ascension: {statistics.median(total_deck_sizes)}")
     # Calculate and print median deck size per ascension level (sorted)
     for ascension_level in sorted_ascension_levels:
         median_size = statistics.median(ascension_deck_sizes[ascension_level])
-        print(f"Median deck size for ascension {ascension_level}: {median_size}")
+        median_size_output.append([ascension_level, median_size])
 
+    return median_size_output
 
 def count_average_win_rate_per_card(runs: list[dict], card_to_pack: dict) -> None:
     # Create a dictionary to store the number of wins and total runs for each card
@@ -303,14 +311,20 @@ def count_average_win_rate_per_card(runs: list[dict], card_to_pack: dict) -> Non
 
     # Combine and print the results
     sorted_results = sorted_cards_with_200_runs_or_more + cards_with_less_than_200_runs
+    
+    # List to store formatted data
+    card_win_rate_output = [] 
 
     # Calculate and print the average win rate for each card
     for card, stats in sorted_results:
         if card_to_pack.get(card):
             wins = stats["wins"]
             total_runs = stats["total_runs"]
-            print(f"{add_pack_prefix(card, card_to_pack)}: {make_ratio(wins, total_runs)}")
+            
+            prefix, modified_card_name = add_pack_prefix(card, card_to_pack)
+            card_win_rate_output.append([prefix,modified_card_name, wins, total_runs, make_ratio(wins, total_runs)])
 
+    return card_win_rate_output
 
 def count_average_win_rate_per_card_split_by_rarity(runs: list[dict], card_to_pack: dict, card_to_rarity: dict) -> None:
     # Create a dictionary to store the number of wins and total runs for each card
@@ -331,12 +345,14 @@ def count_average_win_rate_per_card_split_by_rarity(runs: list[dict], card_to_pa
 
     # Group cards by rarity
     rarity_groups = {}
+    rarity_outputs = {}
+
     for card, stats in card_stats.items():
         rarity = card_to_rarity.get(card, "Unknown")
         if rarity not in rarity_groups:
             rarity_groups[rarity] = []
         rarity_groups[rarity].append((card, stats))
-
+    
     # Process and print results for each rarity group
     for rarity, cards in rarity_groups.items():
         print(f"\n------ {rarity.upper()} ------\n")
@@ -346,11 +362,18 @@ def count_average_win_rate_per_card_split_by_rarity(runs: list[dict], card_to_pa
             reverse=True
         )
 
+        single_rarity_stats = []
         for card, stats in sorted_cards:
             if card_to_pack.get(card):
                 wins = stats["wins"]
                 total_runs = stats["total_runs"]
-                print(f"{add_pack_prefix(card, card_to_pack)}: {make_ratio(wins, total_runs)}")
+                prefix, modified_card_name = add_pack_prefix(card, card_to_pack)
+
+                single_rarity_stats.append([prefix,modified_card_name, wins, total_runs, make_ratio(wins, total_runs)])
+                #print(f"{add_pack_prefix(card, card_to_pack)}: {make_ratio(wins, total_runs)}")
+        rarity_outputs[rarity.upper()] = single_rarity_stats
+    
+    return rarity_outputs
 
 
 # This is bogus data for fun
@@ -362,6 +385,7 @@ def count_win_rate_per_picked_hat(runs: list[dict]) -> None:
         # Check if the dictionary contains both "pickedHat" and "victory" keys
         if "pickedHat" in data_dict and "victory" in data_dict:
             picked_hat = data_dict["pickedHat"]
+            player_id = data_dict["host"]
             victory = data_dict["victory"]
 
             # Initialize the pickedHat's statistics if not already present
@@ -377,11 +401,15 @@ def count_win_rate_per_picked_hat(runs: list[dict]) -> None:
                             key=lambda x: (x[1]["wins"] / x[1]["total_runs"] if x[1]["total_runs"] > 0 else 0.0),
                             reverse=True)
 
+    hat_win_rate_output = []
     # Calculate and print the win rate for each pickedHat
     for picked_hat, stats in sorted_results:
         wins = stats["wins"]
         total_runs = stats["total_runs"]
-        print(f"{del_prefix(picked_hat)}: {make_ratio(wins, total_runs)}")
+
+        hat_win_rate_output.append([del_prefix(picked_hat),wins,total_runs,make_ratio(wins,total_runs)])
+        #print(f"{del_prefix(picked_hat)}: {make_ratio(wins, total_runs)}")
+    return hat_win_rate_output
 
 
 def count_median_turn_length_per_enemy(runs: list[dict], high_value_threshold: int = 200) -> None:
@@ -500,14 +528,18 @@ def pack_efficiency_analysis(runs: list[dict], card_to_pack: dict) -> None:
     pack_win_rates = {}
     for pack, count in pack_counts.items():
         win_count = pack_win_counts.get(pack, 0)
-        pack_win_rates[pack] = (win_count / count if count > 0 else 0.0, make_ratio(win_count, count))
+        pack_win_rates[pack] = (win_count / count if count > 0 else 0.0, make_ratio(win_count, count),win_count,count)
 
     # Sort packs by win rate
     sorted_packs = sorted(pack_win_rates.items(), key=lambda x: x[1][0], reverse=True)
 
+    pack_efficiency_output = []
     # Display results
-    for pack, (win_rate_percentage, win_rate_str) in sorted_packs:
-        print(f"{del_prefix(pack)}: {win_rate_str}")
+    for pack, (win_rate_percentage, win_rate_str,wins,count) in sorted_packs:
+        #print(f"{del_prefix(pack)}: {win_rate_str}")
+        pack_efficiency_output.append([del_prefix(pack),wins,count,win_rate_str])
+
+    return pack_efficiency_output
 
 
 def count_upgraded_cards(runs: list[dict]) -> dict:

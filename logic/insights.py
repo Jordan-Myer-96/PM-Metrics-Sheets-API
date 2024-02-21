@@ -96,9 +96,13 @@ def count_pack_picks(runs: list[dict]) -> None:
 
     # Sort the results by pick rate in descending order
     sorted_result = sorted(result, key=lambda x: x[3], reverse=True)
-
+    pack_pick_rate_output = []
     for choice, picked_count, not_picked_count, pick_rate in sorted_result:
-        print(f"{del_prefix(choice)}: {pick_rate:.2%} ({picked_count}/{not_picked_count + picked_count})")
+        #print(f"{del_prefix(choice)}: {pick_rate:.2%} ({picked_count}/{not_picked_count + picked_count})")
+        pack_pick_rate_output.append([del_prefix(choice), picked_count, not_picked_count + picked_count,pick_rate])
+
+    return pack_pick_rate_output
+    
 
 def count_most_common_players(runs: list[dict]) -> None:
     host_counts = Counter()
@@ -626,17 +630,19 @@ def median_health_before_rest(runs: List[Dict[str, any]]) -> Dict[int, float]:
     # Compute median health ratio for each ascension
     median_healths = {ascension: statistics.median(health_ratios) for ascension, health_ratios in
                       ascension_healths.items()}
-
+    median_health_output = []
     # Compute and print overall median
     overall_median = statistics.median(overall_health_ratios)
     print(f"Overall Median Health Ratio Before Rest: {overall_median:.2%}")
+    median_health_output.append(["Overall",overall_median])
 
     # Print results for each ascension, sorted
     for ascension in sorted(median_healths.keys()):
         health_ratio = median_healths[ascension]
-        print(f"Ascension {ascension}: Median Health Ratio Before Rest: {health_ratio:.2%}")
+        median_health_output.append([ascension,health_ratio])
+        #print(f"Ascension {ascension}: Median Health Ratio Before Rest: {health_ratio:.2%}")
 
-    return median_healths
+    return median_health_output
 
 
 def smith_vs_rest_ratio(runs: List[Dict[str, any]]) -> Dict[int, Tuple[int, int]]:
@@ -652,18 +658,22 @@ def smith_vs_rest_ratio(runs: List[Dict[str, any]]) -> Dict[int, Tuple[int, int]
                 overall_choices[choice['key']] += 1
 
     # Compute and print overall ratio
+    smith_to_rest_output = []
     overall_ratio = overall_choices['SMITH'] / overall_choices['REST'] if overall_choices['REST'] > 0 else 0
-    print(
-        f"Overall Smith to Rest Ratio: {overall_ratio:.2f} ({overall_choices['SMITH']} Smiths / {overall_choices['REST']} Rests)")
+    smith_to_rest_output.append(["Overall",overall_choices['SMITH'],overall_choices['REST'],overall_ratio])
+
+    # print(
+    #     f"Overall Smith to Rest Ratio: {overall_ratio:.2f} ({overall_choices['SMITH']} Smiths / {overall_choices['REST']} Rests)")
 
     # Compute and print ratio for each ascension, sorted
     for ascension in sorted(ascension_choices.keys()):
         choices = ascension_choices[ascension]
         ratio = choices['SMITH'] / choices['REST'] if choices['REST'] > 0 else 0
-        print(
-            f"Ascension {ascension}: Smith to Rest Ratio: {ratio:.2f} ({choices['SMITH']} Smiths / {choices['REST']} Rests)")
+        smith_to_rest_output.append([ascension,choices['SMITH'],choices['REST'],ratio])
+        # print(
+        #     f"Ascension {ascension}: Smith to Rest Ratio: {ratio:.2f} ({choices['SMITH']} Smiths / {choices['REST']} Rests)")
 
-    return ascension_choices
+    return smith_to_rest_output
 
 
 def gem_impact_on_win_rate(runs: List[Dict[str, Any]]) -> Dict[str, str]:
@@ -883,6 +893,7 @@ def win_rate_deviation_by_ascension_and_pack_compact(runs: List[Dict[str, Any]])
             sign = '+' if deviation > 0 else ''
             win_rate_deviation_by_pack[pack][asc_level] = f"{sign}{deviation:.2%}"
 
+    pack_deviation_output = []
     # Print the results in a compact format
     for pack in sorted(win_rate_deviation_by_pack.keys(), key=lambda p: del_prefix(p)):
         a0_deviation = win_rate_deviation_by_pack[pack].get(0, "N/A")
@@ -895,11 +906,12 @@ def win_rate_deviation_by_ascension_and_pack_compact(runs: List[Dict[str, Any]])
             diff_deviation_str = f"{sign}{diff_deviation:.2f}%"
         else:
             diff_deviation_str = "N/A"
-
-        print(
-            f"{del_prefix(pack)}, Difference: 0/20: {diff_deviation_str}, A0: {a0_deviation}, A20: {a20_deviation}")
-
-    return win_rate_deviation_by_pack
+        
+        pack_deviation_output.append([del_prefix(pack),a0_deviation,a20_deviation,diff_deviation_str])
+        # print(
+        #     f"{del_prefix(pack)}, Difference: 0/20: {diff_deviation_str}, A0: {a0_deviation}, A20: {a20_deviation}")
+        
+    return pack_deviation_output
 
 
 def win_rate_deviation_by_ascension_and_pack_vs_average(runs: List[Dict[str, Any]]) -> Dict[str, Dict[int, str]]:

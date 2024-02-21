@@ -147,54 +147,70 @@ if __name__ == "__main__":
     #insights.count_average_win_rate_per_card_split_by_rarity(all_data_dict[""], card_to_pack, card_to_rarity)
     #insights.pack_efficiency_analysis(all_data_dict[""], card_to_pack, card_to_rarity)
 
-#Winrate by Asc
-    asc_win_rate_data =  filter_lists_without_colon(insights.count_win_rates(all_data_dict[""]))
-    asc_win_rate_headers = ["Ascension","Wins","Total Runs","Winrate"]
-    clear_and_add("Ascension Win Rate Test",asc_win_rate_data,*asc_win_rate_headers,percent_col="D")
+# #Winrate by Asc
+#     asc_win_rate_data =  filter_lists_without_colon(insights.count_win_rates(all_data_dict[""]))
+#     asc_win_rate_headers = ["Ascension","Wins","Total Runs","Winrate"]
+#     clear_and_add("Ascension Win Rate Test",asc_win_rate_data,*asc_win_rate_headers,percent_col="D")
 
-#Pack victory rate
-    pack_victory_data = filter_lists_without_colon(insights.count_pack_victory_rate(all_data_dict[""]))
-    pack_victory_headers = ["Pack","Wins","Total Runs","Winrate"]
-    clear_and_add("Pack Win Rate",pack_victory_data,*pack_victory_headers,percent_col="D")
+# #Pack victory rate
+#     pack_victory_data = filter_lists_without_colon(insights.count_pack_victory_rate(all_data_dict[""]))
+#     pack_victory_headers = ["Pack","Wins","Total Runs","Winrate"]
+#     clear_and_add("Pack Win Rate",pack_victory_data,*pack_victory_headers,percent_col="D")
 
-#Overall card winrate
-    card_win_rate_data = filter_lists_without_colon(insights.count_average_win_rate_per_card(all_data_dict[""], card_to_pack))
-    winrate_headers = ["Pack","Card","Wins","Total Runs","Winrate"]
-    clear_and_add("Card Win Rate",card_win_rate_data,*winrate_headers,percent_col="E")
+# #Overall card winrate
+#     card_win_rate_data = filter_lists_without_colon(insights.count_average_win_rate_per_card(all_data_dict[""], card_to_pack))
+#     winrate_headers = ["Pack","Card","Wins","Total Runs","Winrate"]
+#     clear_and_add("Card Win Rate",card_win_rate_data,*winrate_headers,percent_col="E")
 
-# Winrate by card rarity
-    rarity_winrate_data = insights.count_average_win_rate_per_card_split_by_rarity(all_data_dict[""], card_to_pack, card_to_rarity)
-    rarity_winrate_headers = ["Pack","Card","Wins","Total Runs","Winrate"]
-    common_data = filter_lists_without_colon(rarity_winrate_data.get("COMMON", []))
-    uncommon_data = filter_lists_without_colon(rarity_winrate_data.get("UNCOMMON", []))
-    rare_data = filter_lists_without_colon(rarity_winrate_data.get("RARE", []))
+# # Winrate by card rarity
+#     rarity_winrate_data = insights.count_average_win_rate_per_card_split_by_rarity(all_data_dict[""], card_to_pack, card_to_rarity)
+#     rarity_winrate_headers = ["Pack","Card","Wins","Total Runs","Winrate"]
+#     common_data = filter_lists_without_colon(rarity_winrate_data.get("COMMON", []))
+#     uncommon_data = filter_lists_without_colon(rarity_winrate_data.get("UNCOMMON", []))
+#     rare_data = filter_lists_without_colon(rarity_winrate_data.get("RARE", []))
 
-    clear_and_add("Win Rate per card by rarity (Common)",common_data,*rarity_winrate_headers,percent_col="E")
-    clear_and_add("Win Rate per card by rarity (Uncommon)",uncommon_data,*rarity_winrate_headers,percent_col="E")
-    clear_and_add("Win Rate per card by rarity (Rare)",rare_data,*rarity_winrate_headers,percent_col="E")
+#     clear_and_add("Win Rate per card by rarity (Common)",common_data,*rarity_winrate_headers,percent_col="E")
+#     clear_and_add("Win Rate per card by rarity (Uncommon)",uncommon_data,*rarity_winrate_headers,percent_col="E")
+#     clear_and_add("Win Rate per card by rarity (Rare)",rare_data,*rarity_winrate_headers,percent_col="E")
 
-#Card Pick Rate
-    card_pick_rate_data =  filter_lists_without_colon(insights.count_card_pick_rate(all_data_dict[""], card_to_pack))
-    card_pick_rate_headers = ["Pack","Card","Times Picked","Times Offered","Pick Rate"]
-    clear_and_add("Card Pick Rate",card_pick_rate_data,*card_pick_rate_headers,percent_col="E")
+# #Card Pick Rate
+#     card_pick_rate_data =  filter_lists_without_colon(insights.count_card_pick_rate(all_data_dict[""], card_to_pack))
+#     card_pick_rate_headers = ["Pack","Card","Times Picked","Times Offered","Pick Rate"]
+#     clear_and_add("Card Pick Rate",card_pick_rate_data,*card_pick_rate_headers,percent_col="E")
 
-# Median Winning Deck Size
-    median_deck_data = filter_lists_without_colon(insights.count_median_deck_sizes(all_data_dict[""]))
-    median_deck_headers = ["Ascension Level","Median Victorious Deck Size"]
-    clear_and_add("Median Deck Size by Asc",median_deck_data,*median_deck_headers)
+# # Median Winning Deck Size
+#     median_deck_data = filter_lists_without_colon(insights.count_median_deck_sizes(all_data_dict[""]))
+#     median_deck_headers = ["Ascension Level","Median Victorious Deck Size"]
+#     clear_and_add("Median Deck Size by Asc",median_deck_data,*median_deck_headers)
 
-#Hat Pick Rate
-    hat_pick_rate_data =  filter_lists_without_colon(insights.count_most_common_picked_hats(all_data_dict[""]))
-    hat_pick_rate_headers = ["Hat","Total Runs"]
-    clear_and_add("Total Hat Selection",hat_pick_rate_data,*hat_pick_rate_headers)
+# #Hat Pick Rate
+#     hat_pick_rate_data =  filter_lists_without_colon(insights.count_most_common_picked_hats(all_data_dict[""]))
+#     hat_pick_rate_headers = ["Hat","Total Runs"]
+#     clear_and_add("Total Hat Selection",hat_pick_rate_data,*hat_pick_rate_headers)
 
-#Hat Win Rate
-    hat_win_rate_data = filter_lists_without_colon(insights.count_win_rate_per_picked_hat(all_data_dict[""]))
-    hat_win_rate_headers = ["Hat","Wins","Total Runs","Winrate"]
-    clear_and_add("Win Rate per Hat Selected",hat_win_rate_data,*hat_win_rate_headers,percent_col="D")
+# #Hat Win Rate
+#     hat_win_rate_data = filter_lists_without_colon(insights.count_win_rate_per_picked_hat(all_data_dict[""]))
+#     hat_win_rate_headers = ["Hat","Wins","Total Runs","Winrate"]
+#     clear_and_add("Win Rate per Hat Selected",hat_win_rate_data,*hat_win_rate_headers,percent_col="D")
 
-#Pack Efficiency
-    pack_eff_data = filter_lists_without_colon(insights.pack_efficiency_analysis(all_data_dict[""],card_to_pack))
-    pack_eff_headers = ["Pack","Wins Containing at least 1 card?","Runs","Frequency Cards Are In Winning Decks"]
-    clear_and_add("Pack Efficiency Full",pack_eff_data,*pack_eff_headers,percent_col="D")
+# #Pack Efficiency
+#     pack_eff_data = filter_lists_without_colon(insights.pack_efficiency_analysis(all_data_dict[""],card_to_pack))
+#     pack_eff_headers = ["Pack","Wins Containing at least 1 card?","Runs","Frequency Cards Are In Winning Decks"]
+#     clear_and_add("Pack Efficiency Full",pack_eff_data,*pack_eff_headers,percent_col="D")
 
+    pack_pick_rate_data = insights.count_pack_picks(all_data_dict[""])
+    pack_pick_rate_headers = ["Pack","Total Picked","Total Offered","Pick Rate"]
+    print(pack_pick_rate_data)
+    clear_and_add("Pack Pick Rate",pack_pick_rate_data,*pack_pick_rate_headers,percent_col="D")
+
+    smith_rest_data = insights.smith_vs_rest_ratio(all_data_dict[""])
+    smith_rest_headers = ["Ascension","# of Smiths","# of Rests","Ratio"]
+    clear_and_add("Smith to Rest Ratio",smith_rest_data,*smith_rest_headers)
+
+    health_before_rest_data =insights.median_health_before_rest(all_data_dict[""])
+    health_before_rest_headers = ["Ascension","HP% Before Rest"]
+    clear_and_add("Median Health Before Rest",health_before_rest_data,*health_before_rest_headers,percent_col="B")
+
+    win_rate_dev_data = insights.win_rate_deviation_by_ascension_and_pack_compact(all_data_dict[""])
+    win_rate_dev_headers = ["Pack","A0 Deviation","A20 Deviation","Difference: 0 to 20"]
+    clear_and_add("Rin Rate Deviation by Pack and Asc",win_rate_dev_data,*win_rate_dev_headers,percent_col="D")
